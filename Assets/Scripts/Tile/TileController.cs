@@ -62,6 +62,9 @@ public class TileController : MonoBehaviour
         SetValue(tileValue);
         rb.AddForce(Vector3.up * mergeJumpForce, ForceMode.Impulse);
         Destroy(other.gameObject);
+
+        ScoreManager.Instance?.AddScore(tileValue / 2);
+
         readyToMerge = false;
         Invoke(nameof(EnableMerge), 0.1f);
     }
