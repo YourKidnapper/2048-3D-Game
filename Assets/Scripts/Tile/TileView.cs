@@ -11,9 +11,7 @@ public class TileView : MonoBehaviour
         string valueText = value.ToString();
 
         foreach (var text in allTexts)
-        {
             text.text = valueText;
-        }
 
         meshRenderer.material.color = GetColorByValue(value);
     }

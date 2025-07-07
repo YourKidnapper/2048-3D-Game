@@ -2,84 +2,85 @@ using UnityEngine;
 
 public class DragInput : MonoBehaviour
 {
-    [SerializeField] private Rigidbody rb;
-    [SerializeField] private float moveSpeed = 0.1f;
-
-    private bool isDragging = false;
-    private bool hasLaunched = false;
+     [SerializeField] private float moveSpeed = 0.1f;
+    [SerializeField] private float minZ = -4f, maxZ = 4f;
+    [SerializeField] private TileSpawner tileSpawner;
 
     private Camera mainCamera;
-    [SerializeField] private TileController tileController;
+    private Rigidbody rb;
+    private TileController tileController;
+
+    private bool isDragging = false;
 
     private void Awake()
     {
-        if (rb == null) rb = GetComponent<Rigidbody>();
         mainCamera = Camera.main;
-        if (tileController == null) tileController = GetComponent<TileController>();
+        tileSpawner = FindFirstObjectByType<TileSpawner>();
+        SpawnAndAssignNewTile();
     }
 
-    void Update()
+    private void Update()
     {
-        if (hasLaunched) return;
-
 #if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0))
-            isDragging = true;
-
-        if (Input.GetMouseButtonUp(0))
-        {
-            isDragging = false;
-            LaunchForward();
-        }
-
-        if (isDragging)
-            MoveWithMouse();
+        if (Input.GetMouseButtonDown(0)) isDragging = true;
+        if (Input.GetMouseButtonUp(0)) LaunchForward();
+        if (isDragging) MoveWithMouse();
 #else
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
 
-            if (touch.phase == TouchPhase.Began)
-                isDragging = true;
-
-            else if (touch.phase == TouchPhase.Ended)
-            {
-                isDragging = false;
-                LaunchForward();
-            }
-
-            if (isDragging)
-                MoveWithTouch(touch);
+            if (touch.phase == TouchPhase.Began) isDragging = true;
+            else if (touch.phase == TouchPhase.Ended) LaunchForward();
+            if (isDragging) MoveWithTouch(touch);
         }
 #endif
     }
 
-    void MoveWithMouse()
+    private void MoveWithMouse()
     {
-        Vector3 screenPos = Input.mousePosition;
-        screenPos.z = mainCamera.WorldToScreenPoint(transform.position).z;
-
-        Vector3 worldPos = mainCamera.ScreenToWorldPoint(screenPos);
-        Vector3 targetPos = new Vector3(transform.position.x, transform.position.y, worldPos.z); // Only Z axis changes (left/right)
-
-        rb.MovePosition(Vector3.Lerp(transform.position, targetPos, moveSpeed));
+        Vector3 worldPos = GetWorldMousePosition();
+        MoveTile(worldPos);
     }
 
-    void MoveWithTouch(Touch touch)
+    private void MoveWithTouch(Touch touch)
     {
         Vector3 screenPos = touch.position;
-        screenPos.z = mainCamera.WorldToScreenPoint(transform.position).z;
-
+        screenPos.z = mainCamera.WorldToScreenPoint(tileController.transform.position).z;
         Vector3 worldPos = mainCamera.ScreenToWorldPoint(screenPos);
-        Vector3 targetPos = new Vector3(worldPos.x, transform.position.y, transform.position.z);
-        rb.MovePosition(Vector3.Lerp(transform.position, targetPos, moveSpeed));
+        MoveTile(worldPos);
     }
 
-    void LaunchForward()
+    private void MoveTile(Vector3 worldPos)
     {
-        if (hasLaunched) return;
+        float clampedZ = Mathf.Clamp(worldPos.z, minZ, maxZ);
+        Vector3 targetPos = new Vector3(tileController.transform.position.x, tileController.transform.position.y, clampedZ);
+        rb.MovePosition(Vector3.Lerp(tileController.transform.position, targetPos, moveSpeed));
+    }
 
+    private Vector3 GetWorldMousePosition()
+    {
+        Vector3 screenPos = Input.mousePosition;
+        screenPos.z = mainCamera.WorldToScreenPoint(tileController.transform.position).z;
+        return mainCamera.ScreenToWorldPoint(screenPos);
+    }
+
+    private void LaunchForward()
+    {
+        isDragging = false;
         tileController.Launch();
-        hasLaunched = true;
+        SpawnAndAssignNewTile();
+    }
+
+    private void SpawnAndAssignNewTile()
+    {
+        if (!tileSpawner.CanSpawn) return;
+
+        GameObject newTile = tileSpawner.SpawnNewTile();
+
+        if (newTile == null) return;
+
+        rb = newTile.GetComponent<Rigidbody>();
+        tileController = newTile.GetComponent<TileController>();
     }
 }
