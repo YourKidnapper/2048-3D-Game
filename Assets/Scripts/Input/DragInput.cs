@@ -8,7 +8,7 @@ public class DragInput : MonoBehaviour
 
     private Camera mainCamera;
     private Rigidbody rb;
-    private TileController tileController;
+    private PlayerTile playerTile;
 
     private bool isDragging = false;
     private bool isReadyToLaunch = false;
@@ -17,18 +17,21 @@ public class DragInput : MonoBehaviour
     private void Awake()
     {
         mainCamera = Camera.main;
-        tileSpawner = FindFirstObjectByType<TileSpawner>();
+
+        if (tileSpawner == null)
+            tileSpawner = FindFirstObjectByType<TileSpawner>();
+
         tileSpawner.OnTileSpawned += AssignNewTile;
     }
 
     private void Start()
     {
-        tileSpawner.RequestSpawn();
+        tileSpawner.RequestPlayerTile();
     }
 
     private void Update()
     {
-        if (!isReadyToLaunch || tileController == null) return;
+        if (!isReadyToLaunch || playerTile == null) return;
 
 #if UNITY_EDITOR
         if (Input.GetMouseButtonDown(0)) isDragging = true;
@@ -61,7 +64,7 @@ public class DragInput : MonoBehaviour
     private void MoveWithTouch(Touch touch)
     {
         Vector3 screenPos = touch.position;
-        screenPos.z = mainCamera.WorldToScreenPoint(tileController.transform.position).z;
+        screenPos.z = mainCamera.WorldToScreenPoint(playerTile.transform.position).z;
         Vector3 worldPos = mainCamera.ScreenToWorldPoint(screenPos);
         SetTargetPosition(worldPos);
     }
@@ -75,36 +78,38 @@ public class DragInput : MonoBehaviour
     private Vector3 GetWorldMousePosition()
     {
         Vector3 screenPos = Input.mousePosition;
-        screenPos.z = mainCamera.WorldToScreenPoint(tileController.transform.position).z;
+        screenPos.z = mainCamera.WorldToScreenPoint(playerTile.transform.position).z;
         return mainCamera.ScreenToWorldPoint(screenPos);
     }
 
     private void LaunchForward()
     {
+        if (!isReadyToLaunch || playerTile == null) return;
+
         isDragging = false;
         targetPosition = null;
 
-        if (tileController != null)
-        {
-            tileController.Launch();
-            tileController = null;
-            rb = null;
-            isReadyToLaunch = false;
-        }
+        SoundManager.Instance.PlaySFX(SoundManager.Instance.launchClip);
+        playerTile.Launch();
 
-        tileSpawner.RequestSpawn();
+        playerTile = null;
+        rb = null;
+        isReadyToLaunch = false;
+
+        tileSpawner.RequestPlayerTile();
     }
 
     private void AssignNewTile(GameObject newTile)
     {
-        tileController = newTile.GetComponent<TileController>();
+        playerTile = newTile.GetComponent<PlayerTile>();
         rb = newTile.GetComponent<Rigidbody>();
 
-        if (tileController == null || rb == null)
+        if (playerTile == null || rb == null)
         {
-            Debug.LogError("TileController or Rigidbody missing!");
+            Debug.LogError("PlayerTile or Rigidbody missing!");
             return;
         }
+
         isReadyToLaunch = true;
     }
 }
