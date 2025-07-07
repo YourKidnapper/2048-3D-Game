@@ -193,7 +193,6 @@ GameObject:
   - component: {fileID: 4948669027347515006}
   - component: {fileID: 1147798376743349179}
   - component: {fileID: 8803580887837021729}
-  - component: {fileID: 5103877476420193409}
   m_Layer: 0
   m_Name: MainCube
   m_TagString: Untagged
@@ -381,9 +380,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   launchForce: 30
-  mergeJumpForce: 3
+  mergeJumpForce: 5
   mergeCheckRadius: 0.6
-  rb: {fileID: 5161920254126019857}
 --- !u!222 &8803580887837021729
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -392,21 +390,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3442913672277235284}
   m_CullTransparentMesh: 1
---- !u!114 &5103877476420193409
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3442913672277235284}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 66336a2927fda4646ad84168f11da0ae, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  rb: {fileID: 5161920254126019857}
-  moveSpeed: 0.1
-  tileController: {fileID: 1147798376743349179}
 --- !u!1 &4014975565004613434
 GameObject:
   m_ObjectHideFlags: 0

@@ -2,28 +2,21 @@ using UnityEngine;
 
 public class TileController : MonoBehaviour
 {
-     [SerializeField] private float launchForce = 10f;
+    [SerializeField] private float launchForce = 10f;
     [SerializeField] private float mergeJumpForce = 3f;
-    [SerializeField] private float mergeCheckRadius = 1f;
+    [SerializeField] private float requiredImpulseToMerge = 0.5f;
 
     private TileView tileView;
     private Rigidbody rb;
     private int tileValue;
     private bool hasLaunched = false;
     private bool readyToMerge = true;
+    public bool HasLaunched => hasLaunched;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
         tileView = GetComponent<TileView>();
-    }
-
-    private void Update()
-    {
-        if (!readyToMerge || rb == null) return;
-
-        if (rb.linearVelocity.magnitude < 0.05f)
-            CheckForAdditionalMerges();
     }
 
     public void Init(TileSpawner spawner, int value)
@@ -48,11 +41,19 @@ public class TileController : MonoBehaviour
     private void OnCollisionEnter(Collision collision)
     {
         TileController otherTile = collision.gameObject.GetComponent<TileController>();
-
         if (otherTile == null || otherTile == this) return;
 
-        if (tileValue == otherTile.tileValue && readyToMerge && otherTile.readyToMerge)
-            MergeWith(otherTile);
+        if (!readyToMerge || !otherTile.readyToMerge) return;
+        if (tileValue != otherTile.tileValue) return;
+
+        float impulseMagnitude = collision.impulse.magnitude;
+        if (impulseMagnitude < requiredImpulseToMerge)
+        {
+            Debug.Log("Impulse too low for merge: " + impulseMagnitude);
+            return;
+        }
+
+        MergeWith(otherTile);
     }
 
     private void MergeWith(TileController other)
@@ -61,26 +62,17 @@ public class TileController : MonoBehaviour
         SetValue(tileValue);
         rb.AddForce(Vector3.up * mergeJumpForce, ForceMode.Impulse);
         Destroy(other.gameObject);
-        Invoke(nameof(CheckForAdditionalMerges), 0.1f);
+        readyToMerge = false;
+        Invoke(nameof(EnableMerge), 0.1f);
     }
 
-    private void CheckForAdditionalMerges()
+    private void EnableMerge()
     {
-        Collider[] nearbyColliders = Physics.OverlapSphere(transform.position, mergeCheckRadius);
-
-        foreach (var col in nearbyColliders)
-        {
-            TileController neighbor = col.GetComponent<TileController>();
-
-            if (neighbor != null && neighbor != this &&
-                neighbor.tileValue == tileValue &&
-                neighbor.readyToMerge)
-            {
-                MergeWith(neighbor);
-                return;
-            }
-        }
-
         readyToMerge = true;
+    }
+
+    public bool IsStopped()
+    {
+        return rb.linearVelocity.magnitude < 0.05f;
     }
 }

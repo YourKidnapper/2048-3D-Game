@@ -816,13 +816,14 @@ GameObject:
   - component: {fileID: 498767017}
   - component: {fileID: 498767016}
   - component: {fileID: 498767015}
+  - component: {fileID: 498767019}
   m_Layer: 0
   m_Name: Game Over Zone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &498767014
 Transform:
   m_ObjectHideFlags: 0
@@ -934,6 +935,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 498767013}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &498767019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 498767013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5ad2ceb42fecd64b97c4d951d71bef1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1138,7 +1151,7 @@ Transform:
   m_GameObject: {fileID: 1516390832}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.36, y: 4, z: 0}
+  m_LocalPosition: {x: 3.35, y: 3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1284,6 +1297,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1740915950}
   - component: {fileID: 1740915951}
+  - component: {fileID: 1740915952}
+  - component: {fileID: 1740915953}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -1322,6 +1337,34 @@ MonoBehaviour:
   tileParent: {fileID: 1516390833}
   spawnPoint: {fileID: 1516390833}
   spawnDelay: 0.5
+--- !u!114 &1740915952
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740915949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66336a2927fda4646ad84168f11da0ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 2
+  minZ: -4
+  maxZ: 4
+  tileSpawner: {fileID: 1740915951}
+--- !u!114 &1740915953
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740915949}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbc7ba85d24b7f84d9154cb375729e3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1918928059
 GameObject:
   m_ObjectHideFlags: 0

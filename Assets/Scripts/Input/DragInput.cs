@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class DragInput : MonoBehaviour
 {
-     [SerializeField] private float moveSpeed = 0.1f;
+    [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private float minZ = -4f, maxZ = 4f;
     [SerializeField] private TileSpawner tileSpawner;
 
@@ -11,16 +11,25 @@ public class DragInput : MonoBehaviour
     private TileController tileController;
 
     private bool isDragging = false;
+    private bool isReadyToLaunch = false;
+    private Vector3? targetPosition = null;
 
     private void Awake()
     {
         mainCamera = Camera.main;
         tileSpawner = FindFirstObjectByType<TileSpawner>();
-        SpawnAndAssignNewTile();
+        tileSpawner.OnTileSpawned += AssignNewTile;
+    }
+
+    private void Start()
+    {
+        tileSpawner.RequestSpawn();
     }
 
     private void Update()
     {
+        if (!isReadyToLaunch || tileController == null) return;
+
 #if UNITY_EDITOR
         if (Input.GetMouseButtonDown(0)) isDragging = true;
         if (Input.GetMouseButtonUp(0)) LaunchForward();
@@ -29,7 +38,6 @@ public class DragInput : MonoBehaviour
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
-
             if (touch.phase == TouchPhase.Began) isDragging = true;
             else if (touch.phase == TouchPhase.Ended) LaunchForward();
             if (isDragging) MoveWithTouch(touch);
@@ -37,10 +45,17 @@ public class DragInput : MonoBehaviour
 #endif
     }
 
+    private void FixedUpdate()
+    {
+        if (!isReadyToLaunch || !targetPosition.HasValue || rb == null) return;
+
+        rb.MovePosition(Vector3.Lerp(rb.position, targetPosition.Value, Time.fixedDeltaTime * moveSpeed));
+    }
+
     private void MoveWithMouse()
     {
         Vector3 worldPos = GetWorldMousePosition();
-        MoveTile(worldPos);
+        SetTargetPosition(worldPos);
     }
 
     private void MoveWithTouch(Touch touch)
@@ -48,14 +63,13 @@ public class DragInput : MonoBehaviour
         Vector3 screenPos = touch.position;
         screenPos.z = mainCamera.WorldToScreenPoint(tileController.transform.position).z;
         Vector3 worldPos = mainCamera.ScreenToWorldPoint(screenPos);
-        MoveTile(worldPos);
+        SetTargetPosition(worldPos);
     }
 
-    private void MoveTile(Vector3 worldPos)
+    private void SetTargetPosition(Vector3 worldPos)
     {
         float clampedZ = Mathf.Clamp(worldPos.z, minZ, maxZ);
-        Vector3 targetPos = new Vector3(tileController.transform.position.x, tileController.transform.position.y, clampedZ);
-        rb.MovePosition(Vector3.Lerp(tileController.transform.position, targetPos, moveSpeed));
+        targetPosition = new Vector3(rb.position.x, rb.position.y, clampedZ);
     }
 
     private Vector3 GetWorldMousePosition()
@@ -68,19 +82,29 @@ public class DragInput : MonoBehaviour
     private void LaunchForward()
     {
         isDragging = false;
-        tileController.Launch();
-        SpawnAndAssignNewTile();
+        targetPosition = null;
+
+        if (tileController != null)
+        {
+            tileController.Launch();
+            tileController = null;
+            rb = null;
+            isReadyToLaunch = false;
+        }
+
+        tileSpawner.RequestSpawn();
     }
 
-    private void SpawnAndAssignNewTile()
+    private void AssignNewTile(GameObject newTile)
     {
-        if (!tileSpawner.CanSpawn) return;
-
-        GameObject newTile = tileSpawner.SpawnNewTile();
-
-        if (newTile == null) return;
-
-        rb = newTile.GetComponent<Rigidbody>();
         tileController = newTile.GetComponent<TileController>();
+        rb = newTile.GetComponent<Rigidbody>();
+
+        if (tileController == null || rb == null)
+        {
+            Debug.LogError("TileController or Rigidbody missing!");
+            return;
+        }
+        isReadyToLaunch = true;
     }
 }
