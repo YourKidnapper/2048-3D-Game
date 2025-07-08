@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
 
     private readonly List<PlayerTile> activeTiles = new();
     private bool isGameOver = false;
+    private bool hasWon = false;
 
     private void Awake()
     {
@@ -59,6 +60,8 @@ public class GameManager : MonoBehaviour
 
     private void CheckTileCount()
     {
+        if (hasWon) return;
+
         if (activeTiles.Count > maxTilesBeforeGameOver)
         {
             TriggerGameOver();
@@ -67,9 +70,10 @@ public class GameManager : MonoBehaviour
 
     private void HandleWin()
     {
-        if (isGameOver) return;
+        if (isGameOver || hasWon) return;
 
         isGameOver = true;
+        hasWon = true;
         Time.timeScale = 0f;
 
         if (winPanel != null)
@@ -92,6 +96,7 @@ public class GameManager : MonoBehaviour
     public void RestartGame()
     {
         Time.timeScale = 1f;
+        hasWon = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

@@ -26,7 +26,8 @@ public class DragInput : MonoBehaviour
 
     private void Start()
     {
-        tileSpawner.RequestPlayerTile();
+        if(!isReadyToLaunch)
+            tileSpawner.RequestPlayerTile();
     }
 
     private void Update()
@@ -106,7 +107,6 @@ public class DragInput : MonoBehaviour
 
         if (playerTile == null || rb == null)
         {
-            Debug.LogError("PlayerTile or Rigidbody missing!");
             return;
         }
 

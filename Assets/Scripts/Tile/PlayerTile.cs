@@ -34,7 +34,6 @@ public class PlayerTile : BaseTile
         float impulse = collision.impulse.magnitude;
         if (impulse < requiredImpulseToMerge)
         {
-            Debug.Log("Impulse too low for merge: " + impulse);
             return;
         }
 
@@ -58,11 +57,6 @@ public class PlayerTile : BaseTile
     private void EnableMerge()
     {
         readyToMerge = true;
-    }
-
-    public bool IsStopped()
-    {
-        return rb.linearVelocity.magnitude < 0.05f;
     }
 
     private void OnDestroy()
