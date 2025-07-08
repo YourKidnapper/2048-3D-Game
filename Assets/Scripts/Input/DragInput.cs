@@ -35,16 +35,40 @@ public class DragInput : MonoBehaviour
         if (!isReadyToLaunch || playerTile == null) return;
 
 #if UNITY_EDITOR
-        if (Input.GetMouseButtonDown(0)) isDragging = true;
-        if (Input.GetMouseButtonUp(0)) LaunchForward();
-        if (isDragging) MoveWithMouse();
+        if (Input.GetMouseButtonDown(0))
+        {
+            isDragging = true;
+            MoveWithMouse();
+        }
+        else if (Input.GetMouseButton(0) && isDragging)
+        {
+            MoveWithMouse();
+        }
+        else if (Input.GetMouseButtonUp(0))
+        {
+            LaunchForward();
+        }
 #else
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
-            if (touch.phase == TouchPhase.Began) isDragging = true;
-            else if (touch.phase == TouchPhase.Ended) LaunchForward();
-            if (isDragging) MoveWithTouch(touch);
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    isDragging = true;
+                    MoveWithTouch(touch);
+                    break;
+
+                case TouchPhase.Moved:
+                case TouchPhase.Stationary:
+                    if (isDragging) MoveWithTouch(touch);
+                    break;
+
+                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
+                    LaunchForward();
+                    break;
+            }
         }
 #endif
     }
