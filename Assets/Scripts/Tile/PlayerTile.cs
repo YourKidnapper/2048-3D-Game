@@ -44,6 +44,9 @@ public class PlayerTile : BaseTile
     {
         value *= 2;
         SetValue(value);
+
+        GameManager.Instance?.UnregisterTile(this);
+        GameManager.Instance?.RegisterTile(this);
         rb.AddForce(Vector3.up * mergeJumpForce, ForceMode.Impulse);
         SoundManager.Instance.PlaySFX(SoundManager.Instance.mergeClip);
 

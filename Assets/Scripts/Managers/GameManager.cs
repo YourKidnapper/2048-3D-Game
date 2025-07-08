@@ -49,7 +49,7 @@ public class GameManager : MonoBehaviour
         CheckTileCount();
     }
 
-    private void UnregisterTile(BaseTile tile)
+    public void UnregisterTile(BaseTile tile)
     {
         if (tile is PlayerTile playerTile)
         {
